@@ -1,0 +1,60 @@
+html,body{
+    margin: 0%;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, grey,rgb(117, 117, 117));
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: rgb(255, 255, 255);
+}
+
+body::-webkit-scrollbar{
+    display: none;
+}
+
+hr{
+    margin: 0%;
+}
+
+.self h2, .other h2{
+    margin: 0%;
+    width: fit-content;
+}
+
+.self, .other{
+    height:10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    
+}
+
+.board{
+    height: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+}
+
+.cell {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+    cursor: pointer;
+    color: red;
+}
+
+.cell:hover {
+    background-color: #ddd;;
+}

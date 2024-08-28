@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Tic-Tac-Toe</title>
     <link rel="stylesheet" href="/static/css/index.css">
 </head>
 <body>
     <section class="main">
-        <form class="myfrom">
+        <form class="myform">
             <input type="text" id="playername" placeholder="Enter the Player name" required><br>
+            <h6 id="error-message">Room name is Already taken try a new one</h6>
             <input type="text"id="roomname" pattern="\S+" minlength="6" title="spaces are not allowed" placeholder="Enter the Room name" required><br>
             <section class="buttons">
-                <button onclick="" disabled>Create Room</button>
-                <button onclick="" disabled>Join Room</button>
+                <button type="submit" id="create-room-button" >Create Room</button>
+                <button type="submit" id="join-room-button" >Join Room</button>
             </section>
         </form>
     </section>
+    <script src="/static/js/index.js"></script>
 </body>
 </html>

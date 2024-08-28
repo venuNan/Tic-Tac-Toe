@@ -1,3 +1,7 @@
+:root{
+    /* root block to declare variables */
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -18,7 +22,7 @@ html, body {
     flex-direction: column;
 }
 
-.myfrom{
+.myform{
     display: flex;
     flex-direction: column;
     padding: 10px;
@@ -27,7 +31,7 @@ html, body {
     width:300px;
 }
 
-.main .myfrom #playername, .main .myfrom #roomname{
+.main .myform #playername, .main .myform #roomname{
     border: none;
     border-radius: 5px;
     height: 30px;
@@ -37,28 +41,36 @@ html, body {
     font-size: larger;
     outline: none;
 }
+.main .myform #error-message{
+    color: red;
+    margin: 0%;
+    display: none;
+}
 
 input::placeholder{
     color: rgb(42, 42, 42);
     font-size: medium;
 }
 
-.main .myfrom .buttons{
+
+.main .myform .buttons{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     gap: 10px;
 }
 
-.main .myfrom .buttons button{
+.main .myform .buttons button{
     flex: 1;
     height: 35px;
     border-radius: 7px;
+    cursor: pointer;
     border: none;
+    color: rgb(0, 0, 0);
 }
 
-.main .myfrom .buttons button:hover{
-    background-color: aqua;
+.main .myform .buttons button:hover{
+    background-color: rgb(208, 94, 37);
     transition:0.5s ease-out;
 }
 
