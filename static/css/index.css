@@ -41,9 +41,16 @@ html, body {
     font-size: larger;
     outline: none;
 }
-.main .myform #error-message{
-    color: red;
+
+.main #room-error-message, .main #room-not-exist-message, .main #room-full-error-message{
+    color: #ff0000;
     margin: 0%;
+    display: none;
+    
+}
+
+.main #room-created-message{
+    color: green;
     display: none;
 }
 
