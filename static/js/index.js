@@ -1,13 +1,13 @@
 console.log("script loaded");
 let playername;
 let roomname;
-function createRoom(player_name, room_name) {
+function createRoom(room_name) {
     fetch('/create-room', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ "player_name": player_name, "room_name": room_name }),
+        body: JSON.stringify({"room_name": room_name }),
     })
     .then(response => {
         if (!response.ok) {
@@ -16,10 +16,12 @@ function createRoom(player_name, room_name) {
         return response.json();
     })
     .then(data => {
-        if (data["status"]==="room_exists"){
+        if (data["status"]==="room_exists" || data["stauts"]==="room-name-not-correct"){
+            clear_messages();
             document.getElementById("room-error-message").style.display = "block";
         }
         else if (data["status"]==="room_created"){
+            clear_messages();
             document.getElementById("room-created-message").style.display = "block";
         }
         
@@ -40,11 +42,20 @@ function joinRoom(player_name, room_name) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data["status"]==="room_full"){
-            document.getElementById("room-error-message").style.display = "block";
+        if(data["status"]=="success"){
+            window.location.href=`/gameroom?roomname=${room_name}&playername=${player_name}&player_num=${data["player_num"]}`
+        }
+
+        else if (data["status"]==="room_full"){
+            clear_messages();
+            document.getElementById("room-full-error-message").style.display = "block";
+        }
+        else if(data["status"]==="missing-fields"){
+            document.getElementById("missing-fields").style.display = "block";
         }
         else if (data["status"]==="room_not_exist"){
-            document.getElementById("room-created-message").style.display = "block";
+            clear_messages();
+            document.getElementById("room-not-exist-message").style.display = "block";
         }
         
     })
@@ -58,13 +69,11 @@ document.querySelector(".myform").addEventListener("submit", function(event) {
 
     const player_name = document.getElementById("playername").value;
     const room_name = document.getElementById("roomname").value;
-
     const clickedButton = event.submitter.id;
-
     if (clickedButton === "create-room-button") {
         playername = player_name;
         roomname = room_name;
-        createRoom(player_name, room_name);
+        createRoom(room_name);
 
         console.log("create room button clicked");
         
@@ -80,10 +89,13 @@ document.querySelector(".myform").addEventListener("submit", function(event) {
 
 document.querySelectorAll('.inputs').forEach(ele => {
     ele.addEventListener("input", function() {
-        
-        const h2Elements = document.getElementsByTagName("h2");
-        for (let i = 0; i < h2Elements.length; i++) {
-            h2Elements[i].style.display = "none";
-        }
+        clear_messages();
     });
 });
+
+function clear_messages(){
+    const h2Elements = document.getElementsByTagName("h3");
+    for (let i = 0; i < h2Elements.length; i++) {
+        h2Elements[i].style.display = "none";
+    }
+}

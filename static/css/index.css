@@ -42,7 +42,7 @@ html, body {
     outline: none;
 }
 
-.main #room-error-message, .main #room-not-exist-message, .main #room-full-error-message{
+.main #room-error-message, .main #room-not-exist-message, .main #room-full-error-message, .main #missing-fields{
     color: #ff0000;
     margin: 0%;
     display: none;

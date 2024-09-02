@@ -8,8 +8,8 @@
 </head>
 <body>
     <section class="self">
-        <h2 id="name">
-            Player1 : You(Venu)
+        <h2 id="selfname">
+            Player1 : You({{data["player_name"]}})
         </h2>
     </section>
     <hr>
@@ -28,11 +28,40 @@
     </section>
     <hr>
     <section class="other">
-        <h2 id="name">
-            Player2 : Murali
-        </h2>
+        <div id="wait">
+            <div id="text">
+                <h2>Waiting For other Player</h2>
+            </div>
+            <div class="wave">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+        <h2 id="name"></h2>
     </section>   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
-    <script src="/static/js/gamerrom.js"></script>
+    <script>
+        let para = `roomname=${"{{data['room_name']}}"}&playername=${"{{data['player_name']}}"}&playernum=${"{{data['player_num']}}"}`;
+        const socket = io.connect("http://localhost:5000", {query:para});
+        let yourTurn = false;
+
+        socket.on("other_player_name",function(data){
+            document.getElementById("wait").style.display = "none";
+            document.querySelector(".other #name").textContent = "Player2 : " + data["player_name"];
+        });
+
+        
+
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.addEventListener('click', function() {
+                if (!this.textContent && yourTurn) {
+                    yourTurn = false;
+                    this.textContent = 'X';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

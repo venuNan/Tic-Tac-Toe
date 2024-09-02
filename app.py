@@ -15,7 +15,8 @@ def home():
 def create_room():
     data = request.json
     room = data["room_name"]
-    player1 = data["player_name"]
+    if not room:
+        return jsonify({"status":"missing-fields"})
     
     if data["room_name"] not in rooms:
         rooms[room] = {
@@ -35,23 +36,57 @@ def join_existing_room():
     data = request.json
     room = data["room_name"]
     player = data["player_name"]
-    
+    if not (room and player):
+        return jsonify({"status":"missing-fields"})
     if room in rooms:
-        for key in ["player1", "player2"]:
-            if rooms[room][key]["name"] is None:
-                rooms[room][key]["name"] = player
-                rooms[room]["len"] += 1
-                return render_template("gameroom.html")
-        return jsonify({"status": "room_full"})
-            
+        if rooms[room]["player1"]["name"] is None:
+            rooms[room]["player1"]["name"] = player
+            return jsonify({"status":"success","player_num":"1"})
+        elif rooms[room]["player2"]["name"] is None:
+            rooms[room]["player2"]["name"] = player
+            return jsonify({"status":"success","player_num":"2"})
+        else:
+            return jsonify({"status": "room_full"})
     else:
         return jsonify({"status": "room_not_exist"})
 
+@app.route("/gameroom")
+def gameroom():
+    room = request.args.get("roomname","")
+    playername = request.args.get("playername","")
+    player_num = request.args.get("player_num","")
+    print("player_num",player_num)
+    print("room:",room)
+    print("playername:",playername)
+    return render_template("gameroom.html",data={"room_name":room,"player_name":playername, "player_num":player_num})
 
 @socket.on("connect")
 def handle_connect():
-    pass
+    print("connected")
+    room = request.args.get("roomname","")
+    playername = request.args.get("playername","")
+    playernum = request.args.get("playernum","")
+    ssid = request.sid
+    try:
+        if playernum=="1" and rooms[room]["len"] < 2:
+            rooms[room]["player1"]["sid"] = ssid
+            rooms[room]["len"] += 1
+        elif playernum=="2" and rooms[room]["len"] < 2 :
+            rooms[room]["player2"]["sid"] = ssid
+            rooms[room]["len"] += 1
+        print(rooms[room]["len"])
+        if rooms[room]["len"] == 2:
+            emit("other_player_name",{"player_name":rooms[room]["player1"]["name"]},to=rooms[room]["player2"]["sid"])
+            emit("other_player_name",{"player_name":rooms[room]["player2"]["name"]},to=rooms[room]["player1"]["sid"])
+            
+            emit
+
+    except Exception as e:
+        return jsonify({"status":"error occured"})
+
+
+
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    socket.run(app, host="0.0.0.0", port=5000)
