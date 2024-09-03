@@ -1,4 +1,4 @@
-html,body{
+html,body,.main{
     margin: 0%;
     box-sizing: border-box;
     height: 100%;
@@ -6,6 +6,7 @@ html,body{
     background: linear-gradient(to right, grey,rgb(117, 117, 117));
     font-family: Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     color: rgb(255, 255, 255);
+    min-height:450px ;
 }
 
 body::-webkit-scrollbar{
@@ -16,9 +17,44 @@ hr{
     margin: 0%;
 }
 
-.self h2, .other h2{
-    margin: 0%;
-    width: fit-content;
+.main .game{
+    height: 100%;
+    min-height: 450px;
+    z-index: 1;
+    position: relative;
+}
+
+.main .start_dialog_box{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    font-size: 50px;
+    font-weight: bolder;
+    z-index: 3;
+    color: black;
+    position: fixed;
+    display: none;
+    background: rgba(180, 179, 181, 0.834);
+}
+
+.main .start_game_dialogbox{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    height: 100%;
+    width: 100%;
+    z-index: 2;
+    color: black;
+    position: fixed;
+    background: rgba(180, 179, 181, 0.834);
+    display: none;
+}
+
+.main .start_game_dialogbox .wave .dot{
+    color: black;
 }
 
 .self, .other{
@@ -30,21 +66,25 @@ hr{
     
 }
 
-.other #wait{
+.main .game .self h2, .other h2{
+    margin: 0%;
+    width: fit-content;
+}
+
+.main .game .other #wait{
     display: flex;
     flex-direction: row;
     gap: 20px;
 }
 
-
-.board{
+.main .game .board{
     height: 80%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.grid {
+.main .game .board .grid {
     display: grid;
     grid-template-columns: repeat(3, 100px);
     grid-template-rows: repeat(3, 100px);
@@ -76,7 +116,7 @@ hr{
 .dot {
     width: 10px;
     height: 10px;
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(0, 0, 0);
     border-radius: 50%;
     opacity: 0;
     animation: fadeInOut 2s infinite;

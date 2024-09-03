@@ -5,63 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GAME ROOM</title>
     <link rel="stylesheet" href="/static/css/gameroom.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
 </head>
 <body>
-    <section class="self">
-        <h2 id="selfname">
-            Player1 : You({{data["player_name"]}})
-        </h2>
-    </section>
-    <hr>
-    <section class="board">
-        <div class="grid">
-            <div class="cell" id="cell-1"></div>
-            <div class="cell" id="cell-2"></div>
-            <div class="cell" id="cell-3"></div>
-            <div class="cell" id="cell-4"></div>
-            <div class="cell" id="cell-5"></div>
-            <div class="cell" id="cell-6"></div>
-            <div class="cell" id="cell-7"></div>
-            <div class="cell" id="cell-8"></div>
-            <div class="cell" id="cell-9"></div>
-        </div>
-    </section>
-    <hr>
-    <section class="other">
-        <div id="wait">
-            <div id="text">
-                <h2>Waiting For other Player</h2>
-            </div>
+    <section class="main">
+        <section class="start_game_dialogbox">
+            <h2>Starting the game</h2>
             <div class="wave">
                 <div class="dot"></div>
                 <div class="dot"></div>
                 <div class="dot"></div>
                 <div class="dot"></div>
-            </div>
-        </div>
-        <h2 id="name"></h2>
-    </section>   
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
-    <script>
-        let para = `roomname=${"{{data['room_name']}}"}&playername=${"{{data['player_name']}}"}&playernum=${"{{data['player_num']}}"}`;
-        const socket = io.connect("http://localhost:5000", {query:para});
-        let yourTurn = false;
-
-        socket.on("other_player_name",function(data){
-            document.getElementById("wait").style.display = "none";
-            document.querySelector(".other #name").textContent = "Player2 : " + data["player_name"];
-        });
-
-        
-
-        document.querySelectorAll('.cell').forEach(cell => {
-            cell.addEventListener('click', function() {
-                if (!this.textContent && yourTurn) {
-                    yourTurn = false;
-                    this.textContent = 'X';
-                }
-            });
-        });
-    </script>
+            </div> 
+        </section>
+        <section class="start_dialog_box">
+            START !
+        </section>
+        <section class="game">
+            <section class="self">
+                <h2 id="selfname">
+                    Player1 : You({{data["player_name"]}})
+                </h2>
+            </section>
+            <hr>
+            <section class="board">
+                <div class="grid">
+                    <div class="cell" id="cell-1"></div>
+                    <div class="cell" id="cell-2"></div>
+                    <div class="cell" id="cell-3"></div>
+                    <div class="cell" id="cell-4"></div>
+                    <div class="cell" id="cell-5"></div>
+                    <div class="cell" id="cell-6"></div>
+                    <div class="cell" id="cell-7"></div>
+                    <div class="cell" id="cell-8"></div>
+                    <div class="cell" id="cell-9"></div>
+                </div>
+            </section>
+            <hr>
+            <section class="other">
+                <div id="wait">
+                    <div id="text">
+                        <h2>Waiting For other Player</h2>
+                    </div>
+                    <div class="wave">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+                <h2 id="name"></h2>
+            </section>   
+        </section>
+    </section>
 </body>
+<script>
+    let para = `roomname=${"{{data['room_name']}}"}&playername=${"{{data['player_name']}}"}&playernum=${"{{data['player_num']}}"}`;
+    const socket = io.connect("http://192.168.0.132:5000", {query:para});
+    let yourTurn = false;
+
+    socket.on("other_player_name",function(data){
+        document.getElementById("wait").style.display = "none";
+        document.querySelector(".main .game .other #name").textContent = "Player2 : " + data["player_name"];
+    });
+
+    socket.on("start_game", function() {
+        console.log("start game message received");
+        document.querySelector(".main .start_game_dialogbox").style.display = "block";
+            setTimeout(function() {
+            document.querySelector(".main .start_game_dialogbox").style.display = "none";
+            document.querySelector(".main .start_dialog_box").style.display = "block";
+            setTimeout(function() {
+                document.querySelector(".main .start_dialog_box").style.display = "none";
+                yourTurn = true;
+            }, 2000);
+        }, 3000);
+    });
+    
+    socket.on("error", function(data){
+        res = data["message"];
+        window.location.href = `/error?data=${res}`
+    });
+
+
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.addEventListener('click', function() {
+            if (!this.textContent && yourTurn) {
+                yourTurn = false;
+                this.textContent = 'X';
+            }
+        });
+    });
+</script>
 </html>

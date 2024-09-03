@@ -62,27 +62,47 @@ def gameroom():
 
 @socket.on("connect")
 def handle_connect():
-    print("connected")
+
     room = request.args.get("roomname","")
-    playername = request.args.get("playername","")
     playernum = request.args.get("playernum","")
     ssid = request.sid
-    try:
-        if playernum=="1" and rooms[room]["len"] < 2:
-            rooms[room]["player1"]["sid"] = ssid
-            rooms[room]["len"] += 1
-        elif playernum=="2" and rooms[room]["len"] < 2 :
-            rooms[room]["player2"]["sid"] = ssid
-            rooms[room]["len"] += 1
-        print(rooms[room]["len"])
-        if rooms[room]["len"] == 2:
-            emit("other_player_name",{"player_name":rooms[room]["player1"]["name"]},to=rooms[room]["player2"]["sid"])
-            emit("other_player_name",{"player_name":rooms[room]["player2"]["name"]},to=rooms[room]["player1"]["sid"])
-            
-            emit
+    if room in rooms:
+        try:
+            if playernum=="1" and rooms[room]["len"] < 2:
+                rooms[room]["player1"]["sid"] = ssid
+                rooms[room]["len"] += 1
+            elif playernum=="2" and rooms[room]["len"] < 2 :
+                rooms[room]["player2"]["sid"] = ssid
+                rooms[room]["len"] += 1
+            print(rooms[room]["len"])
+            if rooms[room]["len"] == 2:
+                emit("other_player_name",{"player_name":rooms[room]["player1"]["name"]},to=rooms[room]["player2"]["sid"])
+                print("message sended")
+                emit("other_player_name",{"player_name":rooms[room]["player2"]["name"]},to=rooms[room]["player1"]["sid"])
+                print("sendin start game message")
+                emit("start_game",to=rooms[room]["player1"]["sid"])
 
-    except Exception as e:
-        return jsonify({"status":"error occured"})
+        except Exception as e:
+            return jsonify({"status":"error occured"})
+    else:
+        emit("error",{"message":"Room does not exist"})
+
+@app.route("/error")
+def error_page():
+    res = request.args.get("data","")
+    print(res)
+    return render_template("error_page.html",data={"message":res})
+
+@socket.on("disconnect")
+def handle_disconnect():
+    room = request.args.get("roomname", "")
+    playernum = request.args.get("playernum", "")
+    if playernum =="1":
+        emit("error",{"message":"Other player left"},to=rooms[room]["player2"]["sid"])
+    else:
+        emit("error",{"message":"Other player left"},to=rooms[room]["player2"]["sid"])
+    if room in rooms:
+        del rooms[room]
 
 
 
