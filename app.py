@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_socketio import SocketIO, emit
 from env_var import SECRET_KEY
 
 app = Flask(__name__)
@@ -10,6 +10,7 @@ rooms = {}
 @app.route("/")
 def home():
     return render_template("index.html")
+
 
 @app.route("/create-room", methods=["POST"])
 def create_room():
@@ -24,12 +25,12 @@ def create_room():
             "player2": {"name":None,"sid":None},
             "player1moves":set(),
             "player2moves":set(),
-            "len":0,
-            "chance":None
+            "len":0
         }
         return jsonify({"status":"room_created"})
     else:
         return jsonify({"status":"room_exists"})
+
 
 @app.route("/join-room", methods=["POST"])
 def join_existing_room():
@@ -50,19 +51,21 @@ def join_existing_room():
     else:
         return jsonify({"status": "room_not_exist"})
 
+
 @app.route("/gameroom")
 def gameroom():
     room = request.args.get("roomname","")
-    playername = request.args.get("playername","")
-    player_num = request.args.get("player_num","")
-    print("player_num",player_num)
-    print("room:",room)
-    print("playername:",playername)
-    return render_template("gameroom.html",data={"room_name":room,"player_name":playername, "player_num":player_num})
+
+    if room in rooms:
+        playername = request.args.get("playername","")
+        player_num = request.args.get("player_num","")
+        return render_template("gameroom.html",data={"room_name":room,"player_name":playername, "player_num":player_num})
+    else:
+        return render_template("error_page.html",data={"message":"Room does Not exist. Create a new one"})
+    
 
 @socket.on("connect")
 def handle_connect():
-
     room = request.args.get("roomname","")
     playernum = request.args.get("playernum","")
     ssid = request.sid
@@ -77,32 +80,45 @@ def handle_connect():
             print(rooms[room]["len"])
             if rooms[room]["len"] == 2:
                 emit("other_player_name",{"player_name":rooms[room]["player1"]["name"]},to=rooms[room]["player2"]["sid"])
-                print("message sended")
                 emit("other_player_name",{"player_name":rooms[room]["player2"]["name"]},to=rooms[room]["player1"]["sid"])
-                print("sendin start game message")
-                emit("start_game",to=rooms[room]["player1"]["sid"])
-
+                emit("set_type",{"type":"X"},to=rooms[room]["player1"]["sid"])
+                emit("set_type",{"type":"O"},to=rooms[room]["player2"]["sid"])                
+                emit("start_game", to=rooms[room]["player1"]["sid"])
+                
         except Exception as e:
             return jsonify({"status":"error occured"})
     else:
         emit("error",{"message":"Room does not exist"})
 
+@socket.on("move_made")
+def move_made(data):
+    room = request.args.get("roomname","")
+    main_room = rooms[room]
+    playernum = request.args.get("playernum","")
+    print("cell no",data)
+    if playernum=="1":
+        emit("move_made_by_opponent",{"cell_number":data["cell_no"]},to=main_room["player2"]["sid"])
+    else:
+        emit("move_made_by_opponent",{"cell_number":data["cell_no"]},to=main_room["player1"]["sid"])
+
+
+
 @app.route("/error")
 def error_page():
     res = request.args.get("data","")
-    print(res)
     return render_template("error_page.html",data={"message":res})
 
 @socket.on("disconnect")
 def handle_disconnect():
     room = request.args.get("roomname", "")
     playernum = request.args.get("playernum", "")
-    if playernum =="1":
-        emit("error",{"message":"Other player left"},to=rooms[room]["player2"]["sid"])
-    else:
-        emit("error",{"message":"Other player left"},to=rooms[room]["player2"]["sid"])
     if room in rooms:
-        del rooms[room]
+        if playernum =="1":
+            emit("error",{"message":"Other player left.  Want to play again create a new room."},to=rooms[room]["player2"]["sid"])
+        else:
+            emit("error",{"message":"Other player left. Want to play again create a new room."},to=rooms[room]["player1"]["sid"])
+        if room in rooms:
+            del rooms[room]
 
 
 
