@@ -101,6 +101,23 @@ def move_made(data):
     else:
         emit("move_made_by_opponent",{"cell_number":data["cell_no"]},to=main_room["player1"]["sid"])
 
+@socket.on("won")
+def won():
+    room = request.args.get("roomname","")
+    main_room = rooms[room]
+    playernum = request.args.get("playernum","")
+    emit("lost",to=main_room[f'player{"2" if playernum=="1" else "1"}']["sid"])
+    if room in rooms:
+        del rooms[room]
+
+@socket.on("draw")
+def draw():
+    room = request.args.get("roomname","")
+    main_room = rooms[room]
+    playernum = request.args.get("playernum","")
+    emit("draw",to=main_room[f'player{"2" if playernum=="1" else "1"}']["sid"])
+    if room in rooms:
+        del rooms[room]
 
 
 @app.route("/error")
@@ -117,11 +134,8 @@ def handle_disconnect():
             emit("error",{"message":"Other player left.  Want to play again create a new room."},to=rooms[room]["player2"]["sid"])
         else:
             emit("error",{"message":"Other player left. Want to play again create a new room."},to=rooms[room]["player1"]["sid"])
-        if room in rooms:
-            del rooms[room]
-
-
-
+        
+        del rooms[room]
 
 
 if __name__ == "__main__":

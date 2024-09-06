@@ -21,6 +21,18 @@
         <section class="start_dialog_box">
             START !
         </section>
+        <section class="won">
+            You Won
+            <button class="restart">Restart</button>
+        </section>
+        <section class="lost">
+            You lost
+            <button class="restart">Restart</button>
+        </section>
+        <section class="draw">
+            Draw
+            <button class="restart">Restart</button>
+        </section>
         <section class="game">
             <section class="self">
                 <h2 id="selfname">
@@ -70,7 +82,8 @@
     ["1", "5", "9"], ["3", "5", "7"]
     ];
     let playerMoves = new Set();
-
+    let totalMoves = new Set();
+    
     socket.on("other_player_name",function(data){
         document.getElementById("wait").style.display = "none";
         document.querySelector(".main .game .other #name").textContent = "Player2 : " + data["player_name"];
@@ -94,7 +107,32 @@
     
     socket.on("move_made_by_opponent",function(data){
         document.querySelector(`.main .game .board .grid #cell-${data["cell_number"]}`).textContent = type==="X"?"O":"X";
+        totalMoves.add(data["cell_number"]);
+        if (totalMoves.size==9){
+            socket.emit("draw");
+            document.querySelector(".main .draw").style.display = "flex";
+        }
         yourTurn = true;
+    });
+
+    socket.on("lost",function(){
+        document.querySelector(".main .lost").style.display = "flex";
+    });
+
+    socket.on("draw",function(){
+        document.querySelector(".main .draw").style.display = "flex";
+    });
+
+    document.querySelector(".main .won button").addEventListener("click",function(){
+        window.location.href = "/";
+    });
+
+    document.querySelector(".main .lost button").addEventListener("click",function(){
+        window.location.href = "/";
+    });
+
+    document.querySelector(".main .draw button").addEventListener("click",function(){
+        window.location.href = "/";
     });
 
     document.querySelectorAll('.cell').forEach(cell => {
@@ -105,11 +143,18 @@
                 const cellId = this.id;
                 const cellNumber = cellId.split('-')[1];
                 playerMoves.add(cellNumber);
+                totalMoves.add(cellNumber);
                 const hasWon = winningCombinations.some(combo => combo.every(movecell => playerMoves.has(movecell)));
                 if (hasWon) {
+                    document.querySelector(".main .won").style.display = "flex";
                     socket.emit("won");
-                    alert("You won!");
-                } else {
+                    console.log("won and won emit send");
+                }
+                else if(totalMoves.size==9){
+                    socket.emit("draw")
+                    document.querySelector(".main .draw").style.display = "flex";
+                }
+                else {
                     socket.emit("move_made",{"cell_no":cellNumber});
                 }
             }
